@@ -49,8 +49,12 @@ def main(request: flask.Request) -> Tuple[str, int]:
 
     transaction_data: Dict = data["data"]
     if transaction_data["account_id"] != MONZO_ACCOUNT_ID:
-        print(f"Ignoring transaction for account ID {data['data']['account_id']}")
-        return f"Ignoring transaction for account ID {data['data']['account_id']}", 200
+        print(f"Ignoring transaction for different account ID {data['data']['account_id']}")
+        return f"Ignoring transaction for different account ID {data['data']['account_id']}", 200
+
+    if transaction_data["amount"] == 0 and transaction_data["notes"] == "Active card check":
+        print(f"Ignoring active card check")
+        return f"Ignoring active card check", 200
 
     transaction: Transaction = MonzoClient.parse_to_transaction(transaction_data)
     print(f"Parsed transaction: {transaction}")
