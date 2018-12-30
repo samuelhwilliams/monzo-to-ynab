@@ -19,6 +19,10 @@ cp -r {main.py,requirements.txt} function
 cd function
 zip -r9 ${TARGET_DIRECTORY}/function.zip .
 
+# Clean up build directory
+cd ${TARGET_DIRECTORY}
+rm -rf function
+
 # Done
 cd ${TARGET_DIRECTORY}
 echo "Created function ZIP archive at ./function.zip"
