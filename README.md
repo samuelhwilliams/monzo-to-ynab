@@ -18,12 +18,12 @@ A basic Google Cloud Function (GCF) that can be hooked up to a Monzo account and
 
 
 # Updating the function
-1) Re-run `./make_function.sh` after making any code changes.
-2) Edit your function and upload the new archive.
-3) Save and wait for it to deploy.
+1) If you've updated the function requirements (in `requirements-core.txt`), run `./freeze_requirements.sh`.
+2) Run `./make_function.sh` after making any code changes.
+3) Edit your function and upload the new archive (under a **new** Cloud Storage key - as of 2018/12/30, GCF doesn't update source code from a new version of the same key for some reason).
+4) Save and wait for it to deploy.
 
 
 # Todo
 * Tests, ofc.
-* Update transactions in YNAB when Monzo posts an update to say it's been settled.
 * Update GCF code on merge to master.

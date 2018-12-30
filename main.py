@@ -1,12 +1,11 @@
 import os
-from typing import Tuple
+from typing import Tuple, Dict
 
-from dateutil.parser import parse as parse_datetime
 import flask
 
 from monzo_to_ynab.ynab import YnabClient
 from monzo_to_ynab.monzo import MonzoClient
-from monzo_to_ynab.transactions import Transaction, TransactionStatus
+from monzo_to_ynab.transactions import Transaction
 
 
 YNAB_TOKEN = os.environ["YNAB_TOKEN"]  # YNAB Personal Access Token
@@ -17,44 +16,46 @@ MONZO_TOKEN = os.environ["MONZO_TOKEN"]  # Auth token provided to Monzo as the q
 
 
 def handle_monzo_transaction(transaction: Transaction) -> Tuple[str, int]:
-    if transaction.status == TransactionStatus.settled:
-        # We don't have logic to de-dupe/match transactions
-        # As a shortcut, we'll just create transactions when they're authorised, not when they're settled.
-        # This might still create duplicates if Monzo's webhook fires multiple times for a single transaction.
-        #
-        # Pot transactions settle immediately beacause they're internal to Monzo; so we can ignore those.
-        return f"Ignoring settled transaction", 200
-
-    # TODO: Check if transaction already exists; if it does, update `cleared` status (and anything else?)
-
     client = YnabClient(token=YNAB_TOKEN)
 
-    new_transaction = client.create_transaction(
+    transaction_id = client.find_existing_transaction(
         budget_id=YNAB_BUDGET_ID, account_id=YNAB_ACCOUNT_ID, transaction=transaction
     )
+    if transaction_id:
+        updated_transaction = client.update_transaction(
+            budget_id=YNAB_BUDGET_ID, account_id=YNAB_ACCOUNT_ID, transaction_id=transaction_id, transaction=transaction
+        )
 
-    return f"Created new transaction: {new_transaction}", 200
+        return f"Updated existing transaction: {updated_transaction}", 200
+
+    else:
+        new_transaction = client.create_transaction(
+            budget_id=YNAB_BUDGET_ID, account_id=YNAB_ACCOUNT_ID, transaction=transaction
+        )
+
+        return f"Created new transaction: {new_transaction}", 200
 
 
 def main(request: flask.Request) -> Tuple[str, int]:
     if request.args.get("token") != MONZO_TOKEN:
         return "Unauthorized", 401
 
-    data = request.json
+    data: Dict = request.json
     print(f"Incoming data: {data}")
 
     if data["type"] != "transaction.created":
         print(f"Ignoring transaction type {data['type']}")
         return f"Ignoring transaction type {data['type']}", 200
 
-    if data["data"]["account_id"] != MONZO_ACCOUNT_ID:
+    transaction_data: Dict = data["data"]
+    if transaction_data["account_id"] != MONZO_ACCOUNT_ID:
         print(f"Ignoring transaction for account ID {data['data']['account_id']}")
         return f"Ignoring transaction for account ID {data['data']['account_id']}", 200
 
-    transaction = MonzoClient.parse_to_transaction(data)
+    transaction: Transaction = MonzoClient.parse_to_transaction(transaction_data)
     print(f"Parsed transaction: {transaction}")
 
-    result = handle_monzo_transaction(data)
+    result = handle_monzo_transaction(transaction)
     print(f"Result: {result}")
 
     return result

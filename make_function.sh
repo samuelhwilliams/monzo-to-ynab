@@ -10,10 +10,11 @@ TARGET_DIRECTORY=$(pwd)
 rm -rf function function.zip
 
 # Create new dir for function
-mkdir function
+mkdir -p function/monzo_to_ynab
 
 # Copy files and install requirements in function dir
 cp -r {main.py,requirements.txt} function
+find monzo_to_ynab -name "*.py" -exec cp {} function/monzo_to_ynab \;
 
 # Archive required files
 cd function
