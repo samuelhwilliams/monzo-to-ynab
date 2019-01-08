@@ -1,3 +1,4 @@
+from functools import wraps
 import os
 from typing import Tuple, Dict
 
@@ -36,6 +37,17 @@ def handle_monzo_transaction(transaction: Transaction) -> Tuple[str, int]:
         return f"Created new transaction: {new_transaction}", 200
 
 
+def print_result(f):
+    @wraps
+    def wrapper(*args, **kwargs):
+        reason, code = f(*args, **kwargs)
+        print(reason)
+        return reason, code
+
+    return wrapper
+
+
+@print_result
 def main(request: flask.Request) -> Tuple[str, int]:
     if request.args.get("token") != MONZO_TOKEN:
         return "Unauthorized", 401
@@ -44,16 +56,16 @@ def main(request: flask.Request) -> Tuple[str, int]:
     print(f"Incoming data: {data}")
 
     if data["type"] != "transaction.created":
-        print(f"Ignoring transaction type {data['type']}")
         return f"Ignoring transaction type {data['type']}", 200
 
     transaction_data: Dict = data["data"]
+    if "decline_reason" in transaction_data:
+        return "Ignoring declined transaction", 200
+
     if transaction_data["account_id"] != MONZO_ACCOUNT_ID:
-        print(f"Ignoring transaction for different account ID {data['data']['account_id']}")
         return f"Ignoring transaction for different account ID {data['data']['account_id']}", 200
 
     if transaction_data["amount"] == 0 and transaction_data["notes"] == "Active card check":
-        print(f"Ignoring active card check")
         return f"Ignoring active card check", 200
 
     transaction: Transaction = MonzoClient.parse_to_transaction(transaction_data)
