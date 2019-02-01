@@ -73,6 +73,7 @@ class YnabClient:
     def find_existing_transaction(self, budget_id: str, account_id: str, transaction: Transaction) -> Optional[str]:
         params = {"since_date": transaction.date.date().isoformat()}
         response = self._get(path=f"budgets/{budget_id}/accounts/{account_id}/transactions", params=params)
+        print(f"Response from YNAB: {response.json()}")
 
         print(f"Comparing YNAB transactions:")
         print(f"  {str(transaction)}")
