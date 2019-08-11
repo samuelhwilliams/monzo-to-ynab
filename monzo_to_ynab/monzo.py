@@ -11,7 +11,11 @@ class MonzoClient:
         match_id = data["id"]
         date = parse_datetime(data["created"])
         amount = data["amount"]
-        description = (data.get("merchant") or {}).get("name", "") or data["description"]
+        description = (
+            (data.get("merchant") or {}).get("name", "")
+            or (data.get("counterparty") or {}).get("name", "")
+            or data["description"]
+        )
         status = TransactionStatus.settled if data["settled"] else TransactionStatus.authorized
 
         transaction = Transaction(match_id=match_id, date=date, amount=amount, description=description, status=status)
