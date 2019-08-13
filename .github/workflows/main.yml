@@ -1,0 +1,29 @@
+name: deploy-to-gcp
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    name: Deploy monzo-to-ynab function on GCP
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@master
+
+    - name: Log into GCP
+      uses: actions/gcloud/auth@dc2b6c3bc6efde1869a9d4c21fcad5c125d19b81
+      env:
+        GCLOUD_AUTH: ${{ secrets.GCLOUD_AUTH }}
+
+    - name: Deploy function
+      uses: actions/gcloud/cli@dc2b6c3bc6efde1869a9d4c21fcad5c125d19b81
+      with:
+        args: functions deploy monzo-to-ynab --region ${GCP_REGION} --project ${GCP_PROJECT_ID} --trigger-http --runtime python37 --source .
+      env:
+        GCLOUD_AUTH: ${{ secrets.GCLOUD_AUTH }}
+        GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+        GCP_REGION: ${{ secrets.GCP_REGION }}
