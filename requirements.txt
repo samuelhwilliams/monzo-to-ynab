@@ -11,6 +11,7 @@ pip==18.0
 setuptools==40.2.0
 Werkzeug==0.14.1
 wheel==0.31.1
+google-cloud-kms==1.2.1
 
 # Custom/Override packages
 backoff==1.8.0
@@ -22,8 +23,19 @@ Jinja2==2.10.1
 
 
 ## The following requirements were added by pip freeze:
-certifi==2018.11.29
+cachetools==3.1.1
+certifi==2019.6.16
 chardet==3.0.4
+google-api-core==1.14.2
+google-auth==1.6.3
+googleapis-common-protos==1.6.0
+grpc-google-iam-v1==0.12.3
+grpcio==1.22.0
 idna==2.8
+protobuf==3.9.1
+pyasn1==0.4.6
+pyasn1-modules==0.2.6
+pytz==2019.2
+rsa==4.0
 six==1.12.0
-urllib3==1.24.1
+urllib3==1.24.3

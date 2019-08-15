@@ -1,4 +1,3 @@
-from functools import wraps
 import os
 from typing import Tuple, Dict
 
@@ -7,9 +6,13 @@ import flask
 from monzo_to_ynab.ynab import YnabClient
 from monzo_to_ynab.monzo import MonzoClient
 from monzo_to_ynab.transactions import Transaction
+from monzo_to_ynab.utils import kms_decrypt
 
 
-YNAB_TOKEN = os.environ["YNAB_TOKEN"]  # YNAB Personal Access Token
+KMS_SECRET_RESOURCE_NAME = os.environ["KMS_SECRET_RESOURCE_NAME"]  # GCP KMS key to decrypt secrets
+YNAB_TOKEN = kms_decrypt(
+    KMS_SECRET_RESOURCE_NAME, os.environ["BASE64_KMS_ENCRYPTED_YNAB_TOKEN"]
+)  # YNAB Personal Access Token
 YNAB_BUDGET_ID = os.environ["YNAB_BUDGET_ID"]  # Budget ID as found in the URL with YNAB
 YNAB_ACCOUNT_ID = os.environ["YNAB_ACCOUNT_ID"]  # Account ID under the specified YNAB Budget ID
 MONZO_ACCOUNT_ID = os.environ["MONZO_ACCOUNT_ID"]  # Only process transactions from this account

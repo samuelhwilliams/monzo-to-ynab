@@ -9,6 +9,7 @@ pip==18.0
 setuptools==40.2.0
 Werkzeug==0.14.1
 wheel==0.31.1
+google-cloud-kms==1.2.1
 
 # Custom/Override packages
 backoff==1.8.0
