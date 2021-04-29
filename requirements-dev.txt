@@ -1,7 +1,8 @@
--r requirements-core.txt
+-r requirements.txt
 
 black==18.9b0
 flake8==3.6.0
 pytest==4.0.1
-mypy==0.650
+mypy==0.812
 tox==3.5.3
+pip-tools==6.1.0
